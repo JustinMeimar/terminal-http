@@ -1,0 +1,19 @@
+.App {
+  text-align: center;
+  font-family:'Courier New', Courier, monospace, BlinkMacSystemFont;
+  font-size: 14px;
+}
+
+.AppNav{
+  text-align: center;
+  position: relative; 
+  margin: 0 auto; 
+  width: 70%; 
+}
+
+.home_page{
+  text-align: left;
+  position: relative; 
+  margin: 0 auto; 
+  width: 70%;
+}
