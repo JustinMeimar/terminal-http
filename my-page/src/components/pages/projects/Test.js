@@ -1,11 +1,11 @@
-import { React } from 'react';
+import { React, useState, useEffect } from 'react';
 
 function Test() {
 
-    return( 
-        <div className="project_test"> 
-            This is a test.. 
-        </div>
+    return (
+        <div className="code_editor"> 
+            This is a test... 
+        </div> 
     );
 }
 

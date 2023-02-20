@@ -21,7 +21,7 @@ function Gazprea() {
     function resetTerminal() {
         var term = xTermRef.current.terminal; 
         term.reset();
-        term.write(start_msg);
+        term.write(terminal_msg);
     }
    
     async function awaitData(input) {
@@ -45,6 +45,7 @@ function Gazprea() {
     const onKeyPressed = (event) => {
         var term = xTermRef.current.terminal; 
         
+        return;
         if (!estabslishedCon) {
             estabslishedCon = true;
             term.reset();
@@ -76,6 +77,7 @@ function Gazprea() {
         }
     }
 
+
     return( 
         <div className="project_gazprea"> 
             <div className="terminal_div">
@@ -88,6 +90,10 @@ function Gazprea() {
                     onKey={(e) => onKeyPressed(e)}
                     ref={xTermRef}
                 />
+                Testing the code editor:
+                {/* <CodeEditor
+
+                /> */}
             </div> 
         </div>
     );
