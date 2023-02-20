@@ -11,3 +11,7 @@
     align-items: center;
     display: inline-block;
 }
+
+.project_title {
+    font-size: 24px;
+}

@@ -12,14 +12,19 @@ app.use(cors());
 app.post("/post", (req, res) => {
     
     const command = req.body.input; 
-   
-    exec(`${command}`, (error, stdout, stderr) => {
-      
-      res.json({
-        stdout,
-        stderr
-      });
-    })
+    
+    console.log("recieved command: ", command);
+    try {
+      exec(`${command}`, (error, stdout, stderr) => {        
+        res.json({
+          stdout,
+          stderr
+        });
+      })
+    } catch(exception) {
+      console.log(exception)
+    }
+    
 
 }); 
 
