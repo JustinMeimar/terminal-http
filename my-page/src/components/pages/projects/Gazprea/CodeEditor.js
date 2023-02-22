@@ -3,28 +3,29 @@ import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs';
 import axios from 'axios';
 
-function CodeEditor({ onSelectProgram }) {
+function CodeEditor({ onRunProgram }) {
     
-    const [code, setCode] = useState('const message = "Hello, world!";');
+    const [input, setInput] = useState('aUbUc');
     const [program, setProgram] = useState();
 
     useEffect(() => {
-        getProgram("program");
+        setProgram("nfa-regex");
     }, []);
 
+    // CURRENTLY NOT USED. Will use to fetch predefined inputs for Gazprea (like mergesort, quicksort ...)
     async function getProgram(program) {
           
         const fetchData = async () => {
             const get = axios.get(`http://localhost:3001/file?program=${program}`)
                 .then(response => {
-                    setCode(response.data); 
+                    setInput(response.data); 
                 }); 
         }
         fetchData();        
     }
     
-    const handleCodeChange = (newCode) => {
-        setCode(newCode);
+    const handleInputChange = (newCode) => {
+        setInput(newCode);
     };
     
     const handleProgramChange = (event) => {
@@ -35,8 +36,8 @@ function CodeEditor({ onSelectProgram }) {
         <div className="code_editor">
             {/* Editor */}
             <Editor
-                value={code}
-                onValueChange={handleCodeChange}
+                value={input}
+                onValueChange={handleInputChange}
                 highlight={(code) => highlight(code, languages.javascript, 'javascript')}
                 padding={10}
                 style={{
@@ -48,14 +49,14 @@ function CodeEditor({ onSelectProgram }) {
             />
             
             {/* Run Code Button */}
-            <button onClick={() => {onSelectProgram(code)}}> Run Code </button> 
+            <button onClick={() => {onRunProgram(program, input)}}> Run Code </button> 
                 
             {/* Program Selector Dropdown */}
             <div className="program dropdown">
                 <select onChange={handleProgramChange} value={program}>
-                    <option value="add">Test</option>
-                    <option value="gazprea">Add</option>
-                    <option value="fruit">Gazprea</option>
+                    <option value="nfa-regex">nfa-regex</option>
+                    <option value="b-tree">b-tree</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
             

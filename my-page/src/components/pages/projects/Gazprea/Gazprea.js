@@ -6,7 +6,6 @@ import CodeEditor from './CodeEditor.js';
 function Gazprea() {
 
     const xTermRef = useRef();
-    const editor = <CodeEditor> </CodeEditor>
     const terminalMsg = "justin@website:~$ " 
     const [data, setData] = useState(); 
     
@@ -48,11 +47,10 @@ function Gazprea() {
         return;
     }
         
-    const [program, setProgram] = useState();
-    const selectProgram = (program)  => {
-        setProgram(program);
-        awaitProgramOutput("add", program);
-    }   
+    const onRunProgram = (program, input) => {
+        console.log(program, input); 
+        awaitProgramOutput(program, input);
+    }
 
     return( 
         <div className="project_gazprea"> 
@@ -67,8 +65,10 @@ function Gazprea() {
                     onKey={(e) => onKeyPressed(e)}
                     ref={xTermRef}
                 />
+
                  {/*Editor*/}
-                <CodeEditor onSelectProgram={selectProgram}>
+                <CodeEditor 
+                    onRunProgram={onRunProgram}>
                 </CodeEditor>
 
             </div> 
