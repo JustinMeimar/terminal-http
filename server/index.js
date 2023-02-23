@@ -25,35 +25,92 @@ app.get("/file", (req, res) => {
 
 app.post("/post", (req, res) => {
   
-    const programs = ["nfa-regex", "b-tree"]
+    const programs = ["nfa-regex", "b-tree", "gazprea"]
     const program = req.body.program; 
     const input = req.body.input; 
     
     console.log("recieved program: ", program);
     console.log("received input:", input);
+
+    const execute_gazprea = () => {
+
+      console.log("executing gazprea");
       
-    let bin_path = './programs'
+      const gazc_path = "./bin/gazc";
+      const libgazrt_path = "./bin/libgazrt.so";
+      
+      const temp_in = "./tmp/prog.in" 
+      const temp_ll = "./tmp/prog.ll"
+
+      // Write the input file to a text file
+      fs.writeFile(temp_in, input, (err) => {
+        if (err) {
+          console.error(`Error writing to file ${temp_in}: ${err}`);
+        } else {
+          console.log(`Successfully wrote to file ${temp_ll}`);
+        }
+      });
+
+      try {
+
+        // export environment variable
+        exec(`export LD_PRELOAD=${ libgazrt_path }`);
+       
+        // try to compile input to ll
+        exec(`${gazc_path} ${temp_in} ${temp_ll}`, (error, stdout, stderr) => {
+          if (error) { 
+            console.log("---error---", error);  
+            console.log("---stdout---", stdout);  
+            console.log("---stderr---", stderr);   
+            res.json({
+                stdout, 
+                stderr
+              });
+            return;
+          } else {
+            console.log("successful compile");
+          }
+        }); 
+        // use llc to compile .ll to .c
+        exec(`llc -fileType=obj ${temp_ll} -o tmp/prog.o`,(error) => {
+          if (error) { 
+            console.log("error in step: "); 
+            return; 
+          }
+        }); 
+        // use clang to compile .o and link with runtime
+        exec(`clang prog.o ${libgazrt_path} -o tmp/prog`, (error) => {
+          if (error) { 
+            console.log("error in step: "); 
+            return; 
+          }
+        });
+        // run the executable and return the stdout to client
+        exec(`./temp/prog`, (error, stdout, stderr) => {      
+          if (!error) {
+            res.json({
+              stdout, 
+              stderr
+            });
+          } 
+        });
+
+      } catch(exception) {
+        console.log("problem executing gazprea");
+      }
+    } 
+    // let bin_path = './programs'
     switch (program) {
       //set up the binary path for the program recieved 
       case programs[0]:
-        bin_path += '/nfa-regex/bin/regex'; 
         break;
       case programs[1]:
-        bin_path += '/B-Tree/bin/btree'; 
         break;
+      case programs[2]:
+        execute_gazprea();
     }
-    console.log("bin_path:", bin_path);
 
-    try {
-      exec(`${bin_path} ${input}`, (error, stdout, stderr) => {      
-        res.json({
-          stdout,
-          stderr
-        });
-      })
-    } catch(exception) {
-      console.log(exception);
-    } 
+ 
 }); 
 
 app.listen(PORT, () => {

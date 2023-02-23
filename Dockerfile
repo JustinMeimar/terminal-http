@@ -1,35 +1,37 @@
 FROM node:current-slim
 
-#SERVER
-WORKDIR /server
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    cmake \
+    build-essential \
+    pkg-config \
+    git \
+    uuid-dev \
+    openjdk-11-jre
 
-COPY . /server
-
-RUN npm install
-RUN apt-get update
-RUN apt-get install -y cmake build-essential
-RUN apt-get install pkg-config -y
-RUN apt-get install git -y
-RUN apt-get install uuid-dev -y 
-RUN apt-get install openjdk-11-jre -y
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-
+# Set environment variables
 ENV PROGRAM_ROOT /server/server/programs
 
-#NFA REGEX
-WORKDIR ${PROGRAM_ROOT}/nfa-regex
+# Set working directory
+WORKDIR /server
 
-RUN mkdir build && cd build && cmake .. && make
+# Copy source code
+COPY . .
 
-#B-TREE
-WORKDIR ${PROGRAM_ROOT}/B-Tree
+# Change working directory to HOME and install ANTLR
+WORKDIR /root
+RUN mkdir antlr && cd antlr\
+    sudo git clone https://github.com/antlr/antlr4.git
 
-RUN mkdir build && cd build && cmake .. && make
+    # cd antlr4\
+    # git checkout 4.10.1\
+    # mkdir antlr4-build && cd antlr4-build\
+    # mkdir ../../antlr4-install\
+    # cmake ../runtime/Cpp/ \
+    # -DCMAKE_BUILD_TYPE=RELEASE \
+    # -DCMAKE_INSTALL_PREFIX="/root/antlr/antlr4-install"\
+    # export ANTLR_INS="/root/antlr/antlr4-install"  
 
-#GAZPREA
-WORKDIR ${PROGRAM_ROOT}/Gazprea22
-
-RUN mkdir build && cd build && cmake .. && make
+# Set working directory to server
+WORKDIR /server
