@@ -4,17 +4,23 @@ const bodyParser = require("body-parser");
 const { exec } = require("child_process");
 const fs = require("fs");
 const { stdout, stderr } = require("process");
-
-const PORT = process.env.PORT || 3001;
+const path  = require("path");
+require("dotenv").config();
+const PORT = process.env.PORT || 436;
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
+app.get("/", (req, res) => {
+  console.log("recieved");
+  res.send("Hello, Curl\n");
+});
+
 app.get("/file", (req, res) => {
 
   const fileName = req.query.program;
-  fs.readFile(`./programs/${fileName}.txt`, 'utf8', (err,data) => {
+  fs.readFile(`./inputs/${fileName}.txt`, 'utf8', (err,data) => {
     if (err) {
       console.log(err);
     } else {
