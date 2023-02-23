@@ -42,62 +42,82 @@ app.post("/post", (req, res) => {
       const temp_in = "./tmp/prog.in" 
       const temp_ll = "./tmp/prog.ll"
 
-      // Write the input file to a text file
-      fs.writeFile(temp_in, input, (err) => {
-        if (err) {
-          console.error(`Error writing to file ${temp_in}: ${err}`);
-        } else {
-          console.log(`Successfully wrote to file ${temp_ll}`);
-        }
-      });
-
-      try {
-
-        // export environment variable
-        exec(`export LD_PRELOAD=${ libgazrt_path }`);
-       
-        // try to compile input to ll
-        exec(`${gazc_path} ${temp_in} ${temp_ll}`, (error, stdout, stderr) => {
-          if (error) { 
-            console.log("---error---", error);  
-            console.log("---stdout---", stdout);  
-            console.log("---stderr---", stderr);   
-            res.json({
-                stdout, 
-                stderr
-              });
-            return;
-          } else {
-            console.log("successful compile");
-          }
-        }); 
-        // use llc to compile .ll to .c
-        exec(`llc -fileType=obj ${temp_ll} -o tmp/prog.o`,(error) => {
-          if (error) { 
-            console.log("error in step: "); 
-            return; 
-          }
-        }); 
-        // use clang to compile .o and link with runtime
-        exec(`clang prog.o ${libgazrt_path} -o tmp/prog`, (error) => {
-          if (error) { 
-            console.log("error in step: "); 
-            return; 
-          }
-        });
+      const run_executable = () => {
         // run the executable and return the stdout to client
-        exec(`./temp/prog`, (error, stdout, stderr) => {      
-          if (!error) {
+        exec(`sudo LD_PRELOAD=${ libgazrt_path } tmp/prog`, (error, stdout, stderr) => {      
+          if (error) {
+            console.log(error);
+            throw new Error("error in running the executable");
+          } else {
+            console.log("success!");
             res.json({
               stdout, 
               stderr
             });
-          } 
+          }
         });
-
-      } catch(exception) {
-        console.log("problem executing gazprea");
       }
+
+      const compile_to_executable = () => {
+        // use clang to compile .o and link with runtime
+        exec(`clang tmp/prog.o ${libgazrt_path} -o tmp/prog`, (error) => {
+          if (error) { 
+            // console.log("error in clang step", error); 
+            // return; 
+          } else {
+            console.log("successful - compile to executable");
+            run_executable();
+          }
+        });
+      }
+
+      const compile_to_obj = () => {
+        // use llc to compile .ll to .o
+        exec(`llc -filetype=obj ${temp_ll} -o tmp/prog.o`,(error) => {
+          if (error) {  
+            // throw new Error("failed to compile to .o");
+          } else {
+            console.log("successful - compile to .o");
+            compile_to_executable();
+          }
+        }); 
+      }
+
+      const compile_to_ll = () => {
+        // try to compile input to ll
+        exec(`${gazc_path} ${temp_in} ${temp_ll}`, (error, stdout, stderr) => {
+          if (error) { 
+            console.log(stderr);
+            res.json({stdout, stderr});
+            // throw new Error("failed to compile to .ll");
+          } else {
+            console.log("successful - compile to .ll");
+            compile_to_obj();
+          }
+        });
+      }      
+
+      const write_to_file = () => {
+        // Write the input file to a text file
+        fs.writeFile(temp_in, input, (err) => {
+          if (err) {
+            // throw new Error("failed to write file");
+          } else {
+            console.log(`Successfully wrote to file ${temp_in}`);
+            compile_to_ll();
+          }
+        }); 
+      }
+
+      //clean tmp folder
+      exec('./clean.sh', (error) => {
+        if (error) {
+          throw new Error("clean failed");
+        } else { 
+          write_to_file();
+        }
+      });
+ 
     } 
     // let bin_path = './programs'
     switch (program) {
@@ -107,10 +127,12 @@ app.post("/post", (req, res) => {
       case programs[1]:
         break;
       case programs[2]:
-        execute_gazprea();
-    }
-
- 
+        try {         
+          execute_gazprea();
+        } catch(exception) {
+          console.log("problem executing gazprea");
+        } 
+    } 
 }); 
 
 app.listen(PORT, () => {

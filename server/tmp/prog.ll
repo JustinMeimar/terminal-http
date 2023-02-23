@@ -160,19 +160,23 @@ enterSubroutine:
   store %RuntimeStackTy* %0, %RuntimeStackTy** @globalStack
   %1 = load %RuntimeStackTy*, %RuntimeStackTy** @globalStack
   %2 = call i64 @runtimeStackSave(%RuntimeStackTy* %1)
-  %3 = call %RuntimeType* @typeMalloc()
-  call void @typeInitFromIntegerScalar(%RuntimeType* %3)
-  %4 = call %RuntimeVariable* @variableMalloc()
-  call void @variableInitFromIntegerScalar(%RuntimeVariable* %4, i32 0)
+  %3 = call %RuntimeVariable* @variableMalloc()
+  call void @variableInitFromIntegerScalar(%RuntimeVariable* %3, i32 123)
+  call void @variablePrintToStdout(%RuntimeVariable* %3)
+  call void @variableDestructThenFree(%RuntimeVariable* %3)
+  %4 = call %RuntimeType* @typeMalloc()
+  call void @typeInitFromIntegerScalar(%RuntimeType* %4)
   %5 = call %RuntimeVariable* @variableMalloc()
-  call void @variableInitFromDeclaration(%RuntimeVariable* %5, %RuntimeType* %3, %RuntimeVariable* %4)
-  call void @typeDestructThenFree(%RuntimeType* %3)
-  call void @variableDestructThenFree(%RuntimeVariable* %4)
-  %6 = call i32 @variableGetIntegerValue(%RuntimeVariable* %5)
+  call void @variableInitFromIntegerScalar(%RuntimeVariable* %5, i32 0)
+  %6 = call %RuntimeVariable* @variableMalloc()
+  call void @variableInitFromDeclaration(%RuntimeVariable* %6, %RuntimeType* %4, %RuntimeVariable* %5)
+  call void @typeDestructThenFree(%RuntimeType* %4)
   call void @variableDestructThenFree(%RuntimeVariable* %5)
-  %7 = load %RuntimeStackTy*, %RuntimeStackTy** @globalStack
-  call void @runtimeStackRestore(%RuntimeStackTy* %7, i64 %2)
+  %7 = call i32 @variableGetIntegerValue(%RuntimeVariable* %6)
+  call void @variableDestructThenFree(%RuntimeVariable* %6)
   %8 = load %RuntimeStackTy*, %RuntimeStackTy** @globalStack
-  call void @runtimeStackDestructThenFree(%RuntimeStackTy* %8)
-  ret i32 %6
+  call void @runtimeStackRestore(%RuntimeStackTy* %8, i64 %2)
+  %9 = load %RuntimeStackTy*, %RuntimeStackTy** @globalStack
+  call void @runtimeStackDestructThenFree(%RuntimeStackTy* %9)
+  ret i32 %7
 }
