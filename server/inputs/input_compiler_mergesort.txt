@@ -1,0 +1,75 @@
+// MERGESORT
+
+typedef integer int;
+
+procedure merge(var int[*] arr, int left, int mid, int right) {
+    var subArrayOne = mid - left + 1;
+    var subArrayTwo = right - mid;
+
+    var idxLeft = 1;
+    var idxRight = 1;
+    int idxMerge = left;
+
+    int[subArrayOne] tempLeftArray = 0;
+    int[subArrayTwo] tempRightArray = 0;
+
+    int i = 1;
+    int j = 1;
+
+    loop while i <= subArrayOne {
+        tempLeftArray[i] = arr[left + i - 1];
+        i = i + 1;
+    }
+
+    loop while j <= subArrayTwo {
+        tempRightArray[j] = arr[mid + 1 + j - 1];
+        j = j + 1;
+    }
+
+    loop while idxLeft <= subArrayOne {
+        if (idxRight > subArrayTwo) break;
+        if (tempLeftArray[idxLeft] <= tempRightArray[idxRight]) {
+            arr[idxMerge] = tempLeftArray[idxLeft];
+            idxLeft = idxLeft + 1;
+        } else {
+            arr[idxMerge] = tempRightArray[idxRight];
+            idxRight = idxRight + 1;
+        }
+        idxMerge = idxMerge + 1;
+    }
+
+    loop while idxLeft <= subArrayOne {
+        arr[idxMerge] = tempLeftArray[idxLeft];
+        idxLeft = idxLeft + 1;
+        idxMerge = idxMerge + 1;
+    }
+
+    loop while idxRight <= subArrayTwo {
+        arr[idxMerge] = tempRightArray[idxRight];
+        idxRight = idxRight + 1;
+        idxMerge = idxMerge + 1;
+    }
+}
+
+procedure mergeSort(var int[*] arr, int begin, int end) {
+    var mid = begin + (end - begin) / 2;
+
+    //mid -> std_out;
+    
+    if (begin >= end) return;
+
+    call mergeSort(arr, begin, mid);
+    call mergeSort(arr, mid + 1, end);
+    call merge(arr, begin, mid, end);
+}
+
+
+procedure main() returns int {
+    int[*] arr = [12, -2147483648, 11, 13, 2147483647, 5, 6, 7];
+
+    call mergeSort(arr, 1, length(arr));
+
+    arr -> std_out; // Should print [-2147483648 5 6 7 11 12 13 2147483647]
+
+    return 0;
+}
