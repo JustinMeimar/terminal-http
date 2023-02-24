@@ -1,0 +1,13 @@
+// GENERATE SQUARES
+
+typedef integer int;
+
+procedure main() returns integer {
+
+    // make use of the generator language feature!
+    int[10] squares = [i in 1..10 | i * i]; 
+
+    // print square numbers from 1..10 to stdout; 
+    squares -> stdout; 
+
+}

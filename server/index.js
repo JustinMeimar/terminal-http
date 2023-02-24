@@ -17,14 +17,17 @@ app.get("/", (req, res) => {
   res.send("Hello, Curl\n");
 });
 
-app.get("/file", (req, res) => {
+app.get("/get-file", (req, res) => {
 
   const fileName = req.query.program;
-  fs.readFile(`./inputs/${fileName}.txt`, 'utf8', (err,data) => {
+  
+  //test
+  fs.readFile(`./inputs/${fileName}`, 'utf8', (err,data) => {
     if (err) {
       console.log(err);
     } else {
-      res.send(data);
+      console.log("read data successfuly");
+      res.json(data);
     }
   })
 });
