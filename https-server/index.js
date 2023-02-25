@@ -3,25 +3,35 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
 const fs = require("fs");
+const https = require("https");
 const { stdout, stderr } = require("process");
 const path  = require("path");
 require("dotenv").config();
 const PORT = process.env.PORT || 436;
+const HTTPS_PORT = 3443;
 const app = express();
 
-app.use(express.json());
+
+// HTTPS - SERVER 
 app.use(cors());
 
-app.get("/", (req, res) => {
-  console.log("recieved");
-  res.send("Hello, Curl\n");
-});
+app.use(express.json());
 
+//create HTTPS Server 
+const httpsServer = https.createServer({
+  key: fs.readFileSync('./cert/key.pem'),
+  cert: fs.readFileSync('./cert/cert.pem')
+}, app);
+
+// Listen on port 3443 HTTPS
+httpsServer.listen(HTTPS_PORT, () => console.log(`listening on post ${HTTPS_PORT}`));
+
+// Get program from program files
 app.get("/get-file", (req, res) => {
 
   const fileName = req.query.program;
+  console.log("recieved https request on server");
   
-  //test
   fs.readFile(`./inputs/${fileName}`, 'utf8', (err,data) => {
     if (err) {
       console.log(err);
@@ -32,6 +42,7 @@ app.get("/get-file", (req, res) => {
   })
 });
 
+// POST program and program input, return output of program on input
 app.post("/post", (req, res) => {
   
     const programs = ["nfa-regex", "b-tree", "gazprea"]
@@ -142,8 +153,4 @@ app.post("/post", (req, res) => {
           console.log("problem executing gazprea");
         } 
     } 
-}); 
-
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
 });
